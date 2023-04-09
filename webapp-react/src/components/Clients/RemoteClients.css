@@ -1,0 +1,10 @@
+/* InlineList.css */
+.inline-list {
+	display: flex;
+	flex-wrap: nowrap;
+	padding-left: 0;
+  }
+  
+.inline-list > .list-group-item {
+	display: inline-block;
+}
