@@ -1,0 +1,38 @@
+{
+  "name": "sfu",
+  "version": "1.0.0",
+  "description": "Simple Mediasoup SFU",
+  "main": "main.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --pretty --transpile-only src/main.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/balazskreith/webrtc-sfu-transcriber.git"
+  },
+  "keywords": [
+    "sfu",
+    "transcribe",
+    "webrtc"
+  ],
+  "author": "Balazs Kreith",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/balazskreith/webrtc-sfu-transcriber/issues"
+  },
+  "homepage": "https://github.com/balazskreith/webrtc-sfu-transcriber#readme",
+  "dependencies": {
+    "@observertc/observer-js": "file:../../observer-js",
+    "@types/ws": "^8.2.2",
+    "events": "^3.3.0",
+    "mediasoup": "^3.10.0",
+    "prom-client": "^14.2.0",
+    "uuid": "^8.3.2",
+    "ws": "^8.8.0",
+    "yargs-parser": "^21.1.1"
+  },
+  "devDependencies": {
+    "@types/uuid": "^8.3.3"
+  }
+}
