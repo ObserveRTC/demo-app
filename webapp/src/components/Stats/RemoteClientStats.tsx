@@ -4,6 +4,7 @@ import { InboundRtpEntry, RemoteOutboundRtpEntry, W3CStats } from '@observertc/c
 import { useMediaServiceContext } from '../../contexts/MediaServiceContext';
 import StatsCard from './StatsCard';
 import { useAppSelector } from '../../store/hooks';
+import { makePrefixedObj } from '../../utils/common';
 
 export interface RemoteClientStatsProps {
 	clientId: string,
@@ -20,18 +21,9 @@ const RemoteClientsStats: React.FC<RemoteClientStatsProps> = ({ clientId }) => {
 		}
 		const storage = mediaService.monitor.storage;
 		const listener = () => {
-			const rtcInboundRtps: W3CStats.RtcInboundRtpStreamStats[] = [];
+			
+			const rtcInboundRtps: (W3CStats.RtcInboundRtpStreamStats & InboundRtpEntry['updates'])[] = [];
 			const rtcRemoteOutboundRtps: W3CStats.RtcRemoteOutboundRTPStreamStats[] = [];
-			for (const remoteOutboundRtp of Array.from(storage.remoteOutboundRtps())) {
-				// if (
-				// 	remoteOutboundRtp.getInboundRtp()?.getTrackId() === undefined || 
-				// 	remoteOutboundRtp.getInboundRtp()?.getTrackId() === remoteClient?.audioTrackId || 
-				// 	remoteOutboundRtp.getInboundRtp()?.getTrackId() === remoteClient?.videoTrackId
-				// ) {
-				// 	rtcRemoteOutboundRtps.push(remoteOutboundRtp.stats);
-				// }
-				// rtcRemoteOutboundRtps.push(remoteOutboundRtp.stats);
-			}
 			for (const inboundRtp of Array.from(storage.inboundRtps())) {
 				if (
 					remoteClient?.audioTrackId !== inboundRtp.getTrackId() &&
@@ -43,25 +35,9 @@ const RemoteClientsStats: React.FC<RemoteClientStatsProps> = ({ clientId }) => {
 				if (remoteOutboundRtp) {
 					rtcRemoteOutboundRtps.push(remoteOutboundRtp.stats);
 				}
-				// outbounRtp.stats.qualityLimitationDurations
-				const obj: any = {
-				};
-				// for (const [key, value] of Object.entries(outbounRtp.stats.qualityLimitationDurations ?? {})) {
-				// 	obj[`qualityLimitationDurations-${key}`] = value;
-				// }
-				// for (const [key, value] of Object.entries(outbounRtp.stats.qualityLimitationReason ?? {})) {
-				// 	obj[`qualityLimitationReason-${key}`] = value;
-				// }
-				// for (const [key, value] of Object.entries(outbounRtp.stats.qualityLimitationResolutionChanges ?? {})) {
-				// 	obj[`qualityLimitationResolutionChanges-${key}`] = value;
-				// }
-				// const durations = Object.entries(outbounRtp.stats.qualityLimitationDurations ?? {}).map(([key, value]) => )
 				rtcInboundRtps.push({
 					...inboundRtp.stats,
-					// qualityLimitationResolutionChanges: undefined,
-					// qualityLimitationDurations: undefined,
-					// qualityLimitationReason: undefined,
-					...obj,
+					...makePrefixedObj(inboundRtp.updates, 'updates-'),
 				});
 			}
 			// for (const remoteInboundRtp of Array.from(storage.remoteInboundRtps())) {

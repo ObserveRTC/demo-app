@@ -29,7 +29,7 @@ const StatsCard: React.FC<ListingTabProps> = <T extends W3CStats.RtcStats>({ sta
 						<Tab key={statsItem.id} eventKey={statsItem.id} title={statsItem.id}>
 							<Table striped bordered hover size="sm" responsive>
 							<tbody>
-								{Object.entries(statsItem).map(([key, value], i) => (
+								{Object.entries(statsItem).filter(([key]) => !key.startsWith('updates-')).map(([key, value], i) => (
 								<tr key={`${statsItem.id}-${i}`}>
 									<td width="100px" align='left'>{key}</td>
 									<td>{value === undefined ? 'N/A' : 30 < `${value}`.length ? `${value}`.slice(0, 30) + `...` : value}</td>
@@ -37,6 +37,25 @@ const StatsCard: React.FC<ListingTabProps> = <T extends W3CStats.RtcStats>({ sta
 								))}
 							</tbody>
 							</Table>
+							{
+								Object.keys(statsItem).find(k => k.startsWith('updates-')) 
+								? 	<div>
+									<b>client-monitor-js update fields</b>
+									<Table striped bordered hover size="sm" responsive>
+									<tbody>
+										{Object.entries(statsItem).filter(([key]) => key.startsWith('updates-')).map(([key, value], i) => (
+										<tr key={`${statsItem.id}-${i}`}>
+											<td width="100px" align='left'>{key.replace('updates-', '')}</td>
+											<td>{value === undefined ? 'N/A' : 30 < `${value}`.length ? `${value}`.slice(0, 30) + `...` : value}</td>
+										</tr>
+										))}
+									</tbody>
+									</Table>
+									</div>
+									
+								: <></>
+							}
+							
 						</Tab>
 					))}
 					</Tabs>

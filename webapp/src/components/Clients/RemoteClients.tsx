@@ -97,18 +97,6 @@ const RemoteClients: React.FC = () => {
     };
   }, [mediaService]);
 
-  // return (
-  //   <ListGroup as="ul" className="inline-list">
-  //      {Array.from(mediaStreams).map(([remoteClientId, mediaStream]) => {
-  //         return (
-  //           <ListGroup.Item as="li">
-  //             <RemoteClient stream={mediaStream} clientId={remoteClientId} />
-  //           </ListGroup.Item>
-  //         )
-  //       })}
-  //   </ListGroup>
-  // )
-  
   const colWidth = 12 / mediaStreams.length;
   return (
     <Container fluid>

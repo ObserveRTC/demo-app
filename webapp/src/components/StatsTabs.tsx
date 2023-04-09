@@ -27,11 +27,11 @@ const StatsTabs: React.FC = () => {
 				  <Nav.Link eventKey="ice-stats">ICE</Nav.Link>
 				</Nav.Item>
 				<Nav.Item>
-				  <Nav.Link eventKey={localClient.clientId}>{localClient.userId ?? localClient.clientId} Stats</Nav.Link>
+				  <Nav.Link eventKey={localClient.clientId}>{localClient.userId ?? localClient.clientId}</Nav.Link>
 				</Nav.Item>
 				{remoteClients.map(remoteClient => (
 					<Nav.Item>
-				  		<Nav.Link eventKey={remoteClient.clientId}>{remoteClient.userId ?? remoteClient.clientId} Stats</Nav.Link>
+				  		<Nav.Link eventKey={remoteClient.clientId}>{remoteClient.userId ?? remoteClient.clientId}</Nav.Link>
 					</Nav.Item>
 				))}
 			  </Nav>

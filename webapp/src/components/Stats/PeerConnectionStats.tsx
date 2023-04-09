@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
 import { Button, Card, Container, Row, Col } from 'react-bootstrap';
-import { W3CStats } from '@observertc/client-monitor-js';
+import { PeerConnectionEntry, W3CStats } from '@observertc/client-monitor-js';
 import { useMediaServiceContext } from '../../contexts/MediaServiceContext';
 import StatsCard from './StatsCard';
 import { useAppSelector } from '../../store/hooks';
+import { makePrefixedObj } from '../../utils/common';
 
 
 const PeerConnectionStats: React.FC = () => {
@@ -22,7 +23,7 @@ const PeerConnectionStats: React.FC = () => {
 		}
 		const storage = mediaService.monitor.storage;
 		const listener = () => {
-			const pcs: W3CStats.RtcPeerConnectionStats[] = [];
+			const pcs: (W3CStats.RtcPeerConnectionStats & PeerConnectionEntry['updates'])[] = [];
 			const transports: W3CStats.RtcTransportStats[] = [];
 			const rtcAudioSources: W3CStats.RtcAudioSourceStats[] = [];
 			const rtcVideoSources: W3CStats.RtcVideoSourceStats[] = [];
@@ -33,6 +34,7 @@ const PeerConnectionStats: React.FC = () => {
 				if (peerConnection.stats) {
 					pcs.push({
 						...peerConnection.stats,
+						...makePrefixedObj(peerConnection.updates, 'updates-'),
 						id: peerConnection.label ?? peerConnection.id,
 					})
 				}

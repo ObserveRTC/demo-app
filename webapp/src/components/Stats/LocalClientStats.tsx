@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import { Button, Card, Container, Row, Col } from 'react-bootstrap';
-import { W3CStats } from '@observertc/client-monitor-js';
+import { OutboundRtpEntry, W3CStats } from '@observertc/client-monitor-js';
 import { useMediaServiceContext } from '../../contexts/MediaServiceContext';
 import StatsCard from './StatsCard';
+import { makePrefixedObj } from '../../utils/common';
 
 
 const LocalCLientsStats: React.FC = () => {
@@ -16,27 +17,24 @@ const LocalCLientsStats: React.FC = () => {
 		}
 		const storage = mediaService.monitor.storage;
 		const listener = () => {
-			const rtcOutboundRtps: W3CStats.RtcOutboundRTPStreamStats[] = [];
+			const rtcOutboundRtps: (W3CStats.RtcOutboundRTPStreamStats & OutboundRtpEntry['updates'])[] = [];
 			const rtcRemoteInboundRtps: W3CStats.RtcRemoteInboundRtpStreamStats[] = [];
-			for (const outbounRtp of Array.from(storage.outboundRtps())) {
+			for (const outboundRtp of Array.from(storage.outboundRtps())) {
 				// outbounRtp.stats.qualityLimitationDurations
 				const obj: any = {
 				};
-				for (const [key, value] of Object.entries(outbounRtp.stats.qualityLimitationDurations ?? {})) {
+				for (const [key, value] of Object.entries(outboundRtp.stats.qualityLimitationDurations ?? {})) {
 					obj[`qualityLimitationDurations-${key}`] = value;
 				}
-				for (const [key, value] of Object.entries(outbounRtp.stats.qualityLimitationReason ?? {})) {
-					obj[`qualityLimitationReason-${key}`] = value;
-				}
-				for (const [key, value] of Object.entries(outbounRtp.stats.qualityLimitationResolutionChanges ?? {})) {
+				for (const [key, value] of Object.entries(outboundRtp.stats.qualityLimitationResolutionChanges ?? {})) {
 					obj[`qualityLimitationResolutionChanges-${key}`] = value;
 				}
 				// const durations = Object.entries(outbounRtp.stats.qualityLimitationDurations ?? {}).map(([key, value]) => )
 				rtcOutboundRtps.push({
-					...outbounRtp.stats,
+					...outboundRtp.stats,
+					...makePrefixedObj(outboundRtp.updates, 'updates-'),
 					qualityLimitationResolutionChanges: undefined,
 					qualityLimitationDurations: undefined,
-					qualityLimitationReason: undefined,
 					...obj,
 				});
 			}
