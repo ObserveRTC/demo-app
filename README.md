@@ -39,4 +39,13 @@ cd webapp
 yarn start
 ```
 
-## Check Client Monitor
+## Add your monitoring in the webapp
+
+To see how for example you can use the client-monitor and develop something on top of it, 
+you can open `webapp/src/components/Stats/MySandbox.tsx`.
+
+## Access the observed samples at the server
+
+To evaluate stats, see: `server/src/monitor.ts`
+
+To export reports to database see: `server/src/exports.ts`
