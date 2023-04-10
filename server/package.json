@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/balazskreith/webrtc-sfu-transcriber#readme",
   "dependencies": {
-    "@observertc/observer-js": "file:../../observer-js",
+    "@observertc/observer-js": "^0.9.1-beta",
     "@types/ws": "^8.2.2",
     "events": "^3.3.0",
     "mediasoup": "^3.10.0",
