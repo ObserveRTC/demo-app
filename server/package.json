@@ -1,9 +1,11 @@
 {
-  "name": "sfu",
+  "name": "demo-app-observer",
   "version": "1.0.0",
-  "description": "Simple Mediasoup SFU",
+  "description": "Simple Observer",
   "main": "main.js",
   "scripts": {
+    "build": "tsc --build",
+    "clean": "tsc --build --clean",
     "dev": "ts-node-dev --respawn --pretty --transpile-only src/main.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

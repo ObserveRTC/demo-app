@@ -3,6 +3,7 @@ import { Tab, Row, Col, Nav } from "react-bootstrap";
 import { useAppSelector } from "../store/hooks";
 import IceStats from "./Stats/IceStats";
 import LocalCLientsStats from "./Stats/LocalClientStats";
+import MySandbox from "./Stats/MySandbox";
 import PeerConnectionStats from "./Stats/PeerConnectionStats";
 import RemoteClientsStats from "./Stats/RemoteClientStats";
 
@@ -34,6 +35,9 @@ const StatsTabs: React.FC = () => {
 				  		<Nav.Link eventKey={remoteClient.clientId}>{remoteClient.userId ?? remoteClient.clientId}</Nav.Link>
 					</Nav.Item>
 				))}
+				<Nav.Item>
+				  <Nav.Link eventKey='my-sandbox'>My Sandbox</Nav.Link>
+				</Nav.Item>
 			  </Nav>
 			</Col>
 			<Col sm={9}>
@@ -52,6 +56,9 @@ const StatsTabs: React.FC = () => {
 						<RemoteClientsStats clientId={remoteClient.clientId} />
 					</Tab.Pane>
 				))}
+				<Tab.Pane eventKey="my-sandbox">
+				  	<MySandbox />
+				</Tab.Pane>
 			  </Tab.Content>
 			</Col>
 		  </Row>
