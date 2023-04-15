@@ -1,7 +1,7 @@
 import { ClientEvents } from "./ClientEvents"
 import { WebSocket } from "ws";
 import * as mediasoup from 'mediasoup';
-import { ObservedCallSource, Observer } from "@observertc/observer-js";
+import { ObservedCallSource, ObservedClientSource, Observer } from "@observertc/observer-js";
 import { GetRouterCapabilitiesResponse, CreateProducerResponse, CreateTransportResponse, PauseProducerResponse, ConsumerCreatedNotification, JoinCallResponse, ConsumerClosedNotification } from "./MessageProtocol";
 import { createLogger } from "./logger";
 import { RtpCapabilities } from "mediasoup/node/lib/types";
@@ -12,6 +12,7 @@ export type ClientContext = {
 	webSocket: WebSocket,
 	clientId: string,
 	userId: string,
+	clientSource: ObservedClientSource,
 }
 
 export type EventsMap = {
@@ -38,17 +39,12 @@ export type RoomConfig = {
 export abstract class MediasoupRoom {
 
 	private _clients = new Map<string, Client>();
-	private _observedCallSource: ObservedCallSource;
 	public constructor(
 		public readonly config: RoomConfig,
 		private readonly _router: mediasoup.types.Router,
 		private readonly _observer: Observer,
 	) {
 		this._router.observer.once('close', () => this.close());
-		this._observedCallSource = this._observer.createCallSource({
-			roomId: this.roomId,
-			callId: this._router.id,
-		});
 	}
 
 	public get roomId() {
@@ -60,11 +56,8 @@ export abstract class MediasoupRoom {
 	}
 
 	public add(clientContext: ClientContext) {
-		const { clientId, userId } = clientContext;
-		const clientSource = this._observedCallSource.createClientSource({
-			clientId,
-			userId,
-		});
+		const { clientId, userId, clientSource } = clientContext;
+	
 		const producers = new Map<string, mediasoup.types.Producer>();
 		const consumers = new Map<string, mediasoup.types.Consumer>();
 		const events = new ClientEvents(clientContext.webSocket)
@@ -236,7 +229,6 @@ export abstract class MediasoupRoom {
 		})
 		.once('close', () => {
 			logger.info(`Closing client ${clientId}`);
-			clientSource.close();
 			client.sndTransport?.close();
 			client.rcvTransport?.close();
 			this._clients.delete(clientId);

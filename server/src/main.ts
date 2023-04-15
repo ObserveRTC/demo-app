@@ -9,8 +9,14 @@ import { createMonitorProcess } from "./monitor";
 import Prometheus from 'prom-client';
 import { ClientContext } from "./MediasoupRoom";
 import { createExports } from "./exports";
+import { createSfuMonitor } from '@observertc/sfu-monitor-js';
+import { v4 as uuid } from 'uuid';
+import { createSfuPrometheusMonitor } from "./sfuPrometheusMonitor";
 
 const logger = createLogger('main');
+
+const { sfuMonitor, mediasoupCollector } = createSfuMonitorAndMediasoupCollector(mediasoup);
+
 
 async function main(): Promise<void> {
     if (argv["help"] || argv["h"]) {
@@ -29,7 +35,8 @@ async function main(): Promise<void> {
         rtcMaxPort: config.rtcMaxPort,
         appData: workerAppdata,
     });
-    
+
+    // create an observer to accept and process samples from media components (webapp, or SFU)
     const observer = createObserver({
         defaultServiceId: 'observertc',
         defaultMediaUnitId: 'demo-app',
@@ -37,6 +44,15 @@ async function main(): Promise<void> {
             fetchSamples: true,
         },
         logLevel: 'debug',
+    });
+
+    // add SFU to the observer
+    const sfuSource = observer.createSfuSource({
+        sfuId: uuid(),
+        mediaUnitId: 'demo-sfu',
+    })
+    sfuMonitor.on('sample-created', ({ sfuSample }) => {
+        sfuSource.accept(sfuSample);
     });
 
     const rooms = new MediasoupRooms(
@@ -79,24 +95,40 @@ async function main(): Promise<void> {
         //     logger.debug(`Received message 2`, data);
         // }
         rooms.getOrCreateRoom(roomId).then(room => {
+
+            // add client to the observer
+            const clientSource = observer.createClientSource({
+                clientId,
+                userId,
+                mediaUnitId: 'demo-webapp',
+                roomId,
+                callId: room.callId
+            });
+            webSocket.once('close', () => clientSource.close());
+
+
             const clientContext: ClientContext = {
                 clientId,
                 userId,
                 webSocket,
+                clientSource,
             }
             room.add(clientContext);
         })
     });
 
     // add an evaluator process to the observer automatically called
-    // then the observer state changes
+    // when the observer state changes
     observer.addEvaluator(createMonitorProcess(register));
+    observer.addEvaluator(createSfuPrometheusMonitor(register));
 
     // create export processes subscribe the observer created reports
     createExports(observer);
 
+
     process.on('SIGINT', async () => {
         server.stop();
+        mediasoupCollector.close();
         setTimeout(() => {
             // if (!server.closed) {
                 // logger.info("Timeout elapsed, process exit");
@@ -110,6 +142,33 @@ async function main(): Promise<void> {
     });
 
 }
+
+export function createSfuMonitorAndMediasoupCollector(mediasoup: any) {
+
+	const sfuMonitor = createSfuMonitor({
+        logLevel: 'info',
+        collectingPeriodInMs: 5000,
+        samplingPeriodInMs: 15000,
+    });
+    
+    const mediasoupCollector = sfuMonitor.createMediasoupCollector({
+        mediasoup,
+        pollConsumerStats: () => true,
+        pollDataConsumerStats: () => true,
+        pollProducerStats: () => true,
+        pollDataProducerStats: () => true,
+        pollWebRtcTransportStats: () => true,
+    });
+
+    sfuMonitor.on('stats-collected', () => {
+        // logger.info("here", sfuMonitor.storage);
+        sfuMonitor.storage.dump(true);
+    });
+    
+    return { sfuMonitor, mediasoupCollector };
+}
+
+
 
 main()
     .then(() => {
