@@ -1565,8 +1565,12 @@
     loglevel "^1.8.0"
     uuid "^8.3.2"
 
-"@observertc/samples-encoder@file:../../schemas/npm-samples-encoder":
-  version "2.2.0"
+"@observertc/samples-encoder@^2.2.1-9620b7f.0":
+  version "2.2.1-e6b9dfd.0"
+  resolved "https://registry.yarnpkg.com/@observertc/samples-encoder/-/samples-encoder-2.2.1-e6b9dfd.0.tgz#fe08c2cbca9436c734254cba7907e555f3ed735d"
+  integrity sha512-F9Rzuty4CYLCnZxFET/ETc4cnVw0WK+7JPF+daFR9H4MgKGueD+bN59yZ1yxZCgFeYyqckr4pVwg/7IlQH66Wg==
+  dependencies:
+    "@bufbuild/protobuf" "^1.2.0"
 
 "@pmmmwh/react-refresh-webpack-plugin@^0.5.3":
   version "0.5.10"
