@@ -4,14 +4,17 @@ import { createLogger, LogLevel, setLogLevel } from "./logger";
 import { argv, help, loadConfig } from './appconfig';
 import * as mediasoup from 'mediasoup';
 import { MediasoupRooms, WorkerAppData } from "./MediasoupRooms";
-import { createObserver, Models, ObserverConfig } from "@observertc/observer-js";
-import { createMonitorProcess } from "./monitor";
+import { createObserver } from "@observertc/observer-js";
 import Prometheus from 'prom-client';
 import { ClientContext } from "./MediasoupRoom";
 import { createExports } from "./exports";
 import { createSfuMonitor } from '@observertc/sfu-monitor-js';
 import { v4 as uuid } from 'uuid';
-import { createSfuPrometheusMonitor } from "./sfuPrometheusMonitor";
+import { createSfuEvaluator } from "./evaluators/sfuEvaluator";
+import { SfuSampleEncoder } from "@observertc/samples-encoder";
+import { SfuSampleDecoder } from "@observertc/samples-decoder";
+import { createCommonEvaluator } from "./evaluators/commonEvaluator";
+import { createTurnEvaluator } from "./evaluators/turnEvaluator";
 
 const logger = createLogger('main');
 
@@ -51,15 +54,21 @@ async function main(): Promise<void> {
         sfuId: uuid(),
         mediaUnitId: 'demo-sfu',
     })
+    // sfu-sample-encoder and decoder are added here for demonstration purposes
+    const sfuSampleEncoder = new SfuSampleEncoder();
+    const sfuSampleDecoder = new SfuSampleDecoder();
     sfuMonitor.on('sample-created', ({ sfuSample }) => {
-        sfuSource.accept(sfuSample);
+        const encodedSfuSample = sfuSampleEncoder.encodeToUint8Array(sfuSample);
+        const decodedSfuSample = sfuSampleDecoder.decodeFromBytes(encodedSfuSample);
+        // logger.info("decodedSfuSample", decodedSfuSample);
+        sfuSource.accept(decodedSfuSample);
     });
 
     const rooms = new MediasoupRooms(
         worker,
         observer
     );
-    const register = new Prometheus.Registry();
+    const promRegistry = new Prometheus.Registry();
 
     setLogLevel(config.logLevel as LogLevel);
 
@@ -69,7 +78,7 @@ async function main(): Promise<void> {
         const parts = request!.url!.split("/");
         const resource = parts.length < 2 ? undefined : parts[1];
         if (resource === "metrics") {
-            register.metrics().then(data => {
+            promRegistry.metrics().then(data => {
                 response.writeHead(200, {'Content-Type': 'application/json'});
                 response.end(data);
             })
@@ -119,8 +128,16 @@ async function main(): Promise<void> {
 
     // add an evaluator process to the observer automatically called
     // when the observer state changes
-    observer.addEvaluator(createMonitorProcess(register));
-    observer.addEvaluator(createSfuPrometheusMonitor(register));
+    observer.addEvaluators(
+        createCommonEvaluator(promRegistry),
+        createSfuEvaluator(promRegistry),
+        createTurnEvaluator(promRegistry),
+        createSfuEvaluator(promRegistry),
+        async () => {
+            // execute some arbitrary 'callback' task as all evaluation is ended
+        }
+    );
+
 
     // create export processes subscribe the observer created reports
     createExports(observer);
@@ -162,7 +179,8 @@ export function createSfuMonitorAndMediasoupCollector(mediasoup: any) {
 
     sfuMonitor.on('stats-collected', () => {
         // logger.info("here", sfuMonitor.storage);
-        sfuMonitor.storage.dump(true);
+        // const storageDump = sfuMonitor.storage.dump(true);
+        // logger.info(storageDump);
     });
     
     return { sfuMonitor, mediasoupCollector };

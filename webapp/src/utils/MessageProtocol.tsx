@@ -21,7 +21,7 @@ export class ConsumerCreatedNotification {
 export class ObservedSamplesNotification {
     public readonly type = 'observed-sample-notification';
     public constructor(
-        public readonly samples: Samples[]
+        public readonly clientSample: string
     ) {
 
     }

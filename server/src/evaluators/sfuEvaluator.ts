@@ -1,7 +1,7 @@
 import Prometheus from 'prom-client';
 import { EvaluatorProcess } from "@observertc/observer-js";
 
-export function createSfuPrometheusMonitor(registry: Prometheus.Registry): EvaluatorProcess {
+export function createSfuEvaluator(registry: Prometheus.Registry): EvaluatorProcess {
     
     const concurrentRtpStreams = new Prometheus.Gauge({
 		registers: [registry],

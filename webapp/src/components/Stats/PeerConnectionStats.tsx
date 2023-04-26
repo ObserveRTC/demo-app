@@ -37,7 +37,7 @@ const PeerConnectionStats: React.FC = () => {
 						...makePrefixedObj(peerConnection.updates, 'updates-'),
 						id: peerConnection.label ?? peerConnection.id,
 					});
-					console.warn("(peerConnection.updates", peerConnection.updates);
+					// console.warn("peerConnection.updates", peerConnection.updates);
 				}
 				for (const transport of Array.from(peerConnection.transports())) {
 					if (peerConnection.stats) {

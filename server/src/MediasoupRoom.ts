@@ -1,10 +1,11 @@
 import { ClientEvents } from "./ClientEvents"
 import { WebSocket } from "ws";
 import * as mediasoup from 'mediasoup';
-import { ObservedCallSource, ObservedClientSource, Observer } from "@observertc/observer-js";
+import { ObservedClientSource, Observer } from "@observertc/observer-js";
 import { GetRouterCapabilitiesResponse, CreateProducerResponse, CreateTransportResponse, PauseProducerResponse, ConsumerCreatedNotification, JoinCallResponse, ConsumerClosedNotification } from "./MessageProtocol";
 import { createLogger } from "./logger";
 import { RtpCapabilities } from "mediasoup/node/lib/types";
+import { ClientSampleDecoder } from "@observertc/samples-decoder";
 
 const logger = createLogger('Room');
 
@@ -26,8 +27,9 @@ type Client = {
 	rtpCapabilities?: RtpCapabilities,
 	sndTransport?: mediasoup.types.WebRtcTransport,
 	rcvTransport?: mediasoup.types.WebRtcTransport,
-	producers: Map<string, mediasoup.types.Producer>
-	consumers: Map<string, mediasoup.types.Consumer>
+	producers: Map<string, mediasoup.types.Producer>,
+	consumers: Map<string, mediasoup.types.Consumer>,
+	clientSampleDecoder: ClientSampleDecoder,
 }
 
 export type RoomConfig = {
@@ -67,6 +69,7 @@ export abstract class MediasoupRoom {
 			clientEvents: events,
 			producers,
 			consumers,
+			clientSampleDecoder: new ClientSampleDecoder(),
 		};
 		
 		logger.info(`Add client ${clientId}, ${userId}`);
@@ -219,13 +222,9 @@ export abstract class MediasoupRoom {
 				}
 			}
 		})
-		.on('observed-sample-notification', ({ samples }) => {
-			for(const sample of samples) {
-				if (!sample.clientSamples) {
-					return;
-				}
-				clientSource.accept(...sample.clientSamples)
-			}
+		.on('observed-sample-notification', ({ clientSample: base64Str }) => {
+			const clientSample = client.clientSampleDecoder.decodeFromBase64(base64Str);
+			clientSource.accept(clientSample);
 		})
 		.once('close', () => {
 			logger.info(`Closing client ${clientId}`);

@@ -2,15 +2,15 @@
 # yarn lockfile v1
 
 
-"@bufbuild/protobuf@^1.1.1":
+"@bufbuild/protobuf@^1.1.1", "@bufbuild/protobuf@^1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@bufbuild/protobuf/-/protobuf-1.2.0.tgz#7efd5d4aa0540b108eb3b89b42507739e0974299"
   integrity sha512-MBVuQMOBHxgGnZ9XCUIi8WOy5O/T4ma3TduCRhRvndv3UDbG9cHgd8h6nOYSGyBYPEvXf1z9nTwhp8mVIDbq2g==
 
-"@observertc/observer-js@^0.9.1-beta":
-  version "0.9.1-beta"
-  resolved "https://registry.yarnpkg.com/@observertc/observer-js/-/observer-js-0.9.1-beta.tgz#8d67ae494ecd24d282844829582260bdaab9bae4"
-  integrity sha512-WI5C1qrhDpDMaLenaXCo1rtWSZUmHRKNVQkbddoy03yhDobBm7WY7Vc2qNbB6v7sSIabP0MdYtjQ8A+ceTyveA==
+"@observertc/observer-js@^0.9.5-beta":
+  version "0.9.5-beta"
+  resolved "https://registry.yarnpkg.com/@observertc/observer-js/-/observer-js-0.9.5-beta.tgz#7bfb9bb71fc515fe422fa281245b4d7e47bbbf8b"
+  integrity sha512-rZN5pyGd91sSvw3rxoRWdVNj+pN5+N3eeZ90VtrlPV2bykUyoMzvBD07odougRlZkiPQPVD0IZleegEFXhDSsQ==
   dependencies:
     "@bufbuild/protobuf" "^1.1.1"
     "@observertc/report-schemas-js" "2.2.1-rc.0"
@@ -29,6 +29,20 @@
   version "2.2.1-rc.0"
   resolved "https://registry.yarnpkg.com/@observertc/sample-schemas-js/-/sample-schemas-js-2.2.1-rc.0.tgz#db4555cc795616b0649c7d3bf516ca4f85981e37"
   integrity sha512-pg+YeLi5rXx9ggXNbZe5QJ1vrpUdMxbw+Xfd0xG/B7Cf3sXcWQzDrIsts7on2jHcIY+rODV8WFaIMfmCHdIBVQ==
+
+"@observertc/samples-decoder@^2.2.1-9620b7f.0":
+  version "2.2.1-9620b7f.0"
+  resolved "https://registry.yarnpkg.com/@observertc/samples-decoder/-/samples-decoder-2.2.1-9620b7f.0.tgz#bac38ba0630cb2b42fc1a4733db73a7ec15c3c5e"
+  integrity sha512-eakT1zBMnpUl9y46nl556daabW3iu/fFfUCS4wv5A9mDoPXkprTMaVj4NNQEwyr5ocIR6SEG3A7RSFWK01MroA==
+  dependencies:
+    "@bufbuild/protobuf" "^1.2.0"
+
+"@observertc/samples-encoder@^2.2.1-9620b7f.0":
+  version "2.2.1-e6b9dfd.0"
+  resolved "https://registry.yarnpkg.com/@observertc/samples-encoder/-/samples-encoder-2.2.1-e6b9dfd.0.tgz#fe08c2cbca9436c734254cba7907e555f3ed735d"
+  integrity sha512-F9Rzuty4CYLCnZxFET/ETc4cnVw0WK+7JPF+daFR9H4MgKGueD+bN59yZ1yxZCgFeYyqckr4pVwg/7IlQH66Wg==
+  dependencies:
+    "@bufbuild/protobuf" "^1.2.0"
 
 "@observertc/sfu-monitor-js@^2.0.0":
   version "2.0.0"

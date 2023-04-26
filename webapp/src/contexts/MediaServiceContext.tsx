@@ -5,10 +5,9 @@ import { createLogger } from '../utils/logger';
 import { MediaService } from './MediaService';
 import { ServerConnection } from './ServerConnection';
 import { MediasoupService } from './MediasoupService';
-import { v4 as uuid } from 'uuid';
 import { ObservedSamplesNotification } from '../utils/MessageProtocol';
 import { useAppSelector } from '../store/hooks';
-
+import { ClientSampleEncoder } from "@observertc/samples-encoder";
 
 const logger = createLogger('MediaServiceContext');
 
@@ -50,7 +49,7 @@ export const MediaServiceProvider: React.FC<MediaServiceContextProps> = ({ child
 
 	const monitor = createClientMonitor({
 		collectingPeriodInMs: 2000,
-		samplingPeriodInMs: 8000,
+		samplingPeriodInMs: 5000,
 		sendingPeriodInMs: 10000,
 	});
 
@@ -58,6 +57,8 @@ export const MediaServiceProvider: React.FC<MediaServiceContextProps> = ({ child
 		const device = new Device();
 		
 		monitor.collectors.addMediasoupDevice(device);
+
+
 		const mediaService = new MediasoupService(
 			serverConnection,
 			device,
@@ -68,11 +69,44 @@ export const MediaServiceProvider: React.FC<MediaServiceContextProps> = ({ child
 		});
 		
 	}
-
-	monitor.on('send', ({ samples }) => {
-		serverConnection.sendMessage(new ObservedSamplesNotification(
-			samples
-		));
+	
+	for (const peerConnection of Array.from(monitor.storage.peerConnections())) {
+		if (peerConnection.label === 'snd') {
+			
+		}
+	}
+	
+	// const ws = new WebSocket(`ws://localhost:7080/`);
+	const clientSampleEncoder = new ClientSampleEncoder();
+	// const messageSizes: number[] = [];
+	
+	monitor.on('sample-created', ({ clientSample }) => {
+		// serverConnection.sendMessage(new ObservedSamplesNotification(
+		// 	samples
+		// ));
+		
+		try {
+			// const messageSize = clientSampleEncoder.encodeToUint8Array(clientSample).length;
+			// messageSizes.push(messageSize);
+			// console.log("message sizes", messageSizes);
+			const encodedSample = clientSampleEncoder.encodeToBase64(clientSample);
+			// ws.send(encodedSample.toBinary());
+			serverConnection.sendMessage(new ObservedSamplesNotification(
+				encodedSample,
+			))
+			// for (const sample of samples) {
+			// 	for (const clientSample of sample.clientSamples ?? []) {
+			// 		console.log(clientSample);
+			// 		const encodedSample = clientSampleEncoder.encode(clientSample);
+			// 		console.log("encodedSample.toBinary()", encodedSample, encodedSample.toBinary().length);
+			// 	}
+			// }
+		} catch (err ) {
+			console.error(err);
+		}
+		
+		
+		
 	})
   }, [])
 

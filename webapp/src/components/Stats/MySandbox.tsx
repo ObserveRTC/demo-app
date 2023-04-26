@@ -30,9 +30,9 @@ const MySandbox: React.FC<MySandboxProps> = () => {
 			setMyStats({
 				outbPackets: storage.updates.totalOutboundPacketsSent,
 			});
-			console.log({
-				outbPackets: storage.updates.totalOutboundPacketsSent,
-			});
+			// console.log({
+			// 	outbPackets: storage.updates.totalOutboundPacketsSent,
+			// });
 		};
 		mediaService.monitor.on('stats-collected', listener);
 		return () => {

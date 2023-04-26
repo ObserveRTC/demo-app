@@ -1,10 +1,11 @@
 import { CallEventReport, EvaluatorProcess, SfuEventReport } from "@observertc/observer-js";
+import { observer } from "mediasoup";
 import Prometheus from 'prom-client';
-import { createLogger } from "./logger";
+import { createLogger } from "../logger";
 
-const logger = createLogger('MonitorProcess');
+const logger = createLogger('TurnEvaluator');
 
-export function createMonitorProcess(registry: Prometheus.Registry): EvaluatorProcess {
+export function createTurnEvaluator(registry: Prometheus.Registry): EvaluatorProcess {
 	
 	const callDurations = new Prometheus.Histogram({
 		registers: [registry],
@@ -32,22 +33,6 @@ export function createMonitorProcess(registry: Prometheus.Registry): EvaluatorPr
 			storages
 		} = context;
 		
-		// const calls = Array.from(observedCalls.observedCalls());
-		// const clients = Array.from(calls.flatMap(call => Array.from(call.observedClients())));
-		// const peerConnections = Array.from(clients.flatMap(peerConnection => Array.from(peerConnection.observedPeerConnections())));
-		// const inboundAudioTracks = Array.from(peerConnections.flatMap(peerConnection => Array.from(peerConnection.inboundAudioTracks())));
-		// const inboundVideoTracks = Array.from(peerConnections.flatMap(peerConnection => Array.from(peerConnection.inboundVideoTracks())));
-		// const outboundAudioTracks = Array.from(peerConnections.flatMap(peerConnection => Array.from(peerConnection.outboundAudioTracks())));
-		// const outboundVideoTracks = Array.from(peerConnections.flatMap(peerConnection => Array.from(peerConnection.outboundVideoTracks())));
-
-		// console.warn("calls", calls);
-		// console.warn("clients", clients);
-		// console.warn("peerConnections", peerConnections);
-		// console.warn("inboundAudioTracks", inboundAudioTracks);
-		// console.warn("inboundVideoTracks", inboundVideoTracks);
-		// console.warn("outboundAudioTracks", outboundAudioTracks);
-		// console.warn("outboundVideoTracks", outboundVideoTracks);
-
 		// Observe call durations
 		for (const endedCall of endedCalls) {
 			const elapsedTimeInMins = (endedCall.ended -  Number(endedCall.started)) / (60 * 1000);
