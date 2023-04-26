@@ -15,6 +15,7 @@ import { SfuSampleEncoder } from "@observertc/samples-encoder";
 import { SfuSampleDecoder } from "@observertc/samples-decoder";
 import { createCommonEvaluator } from "./evaluators/commonEvaluator";
 import { createTurnEvaluator } from "./evaluators/turnEvaluator";
+import { createCallsEvaluator } from "./evaluators/callsEvaluator";
 
 const logger = createLogger('main');
 
@@ -130,7 +131,7 @@ async function main(): Promise<void> {
     // when the observer state changes
     observer.addEvaluators(
         createCommonEvaluator(promRegistry),
-        createSfuEvaluator(promRegistry),
+        createCallsEvaluator(promRegistry),
         createTurnEvaluator(promRegistry),
         createSfuEvaluator(promRegistry),
         async () => {
