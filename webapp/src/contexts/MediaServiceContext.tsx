@@ -81,9 +81,6 @@ export const MediaServiceProvider: React.FC<MediaServiceContextProps> = ({ child
 	// const messageSizes: number[] = [];
 	
 	monitor.on('sample-created', ({ clientSample }) => {
-		// serverConnection.sendMessage(new ObservedSamplesNotification(
-		// 	samples
-		// ));
 		
 		try {
 			// const messageSize = clientSampleEncoder.encodeToUint8Array(clientSample).length;
@@ -94,13 +91,6 @@ export const MediaServiceProvider: React.FC<MediaServiceContextProps> = ({ child
 			serverConnection.sendMessage(new ObservedSamplesNotification(
 				encodedSample,
 			))
-			// for (const sample of samples) {
-			// 	for (const clientSample of sample.clientSamples ?? []) {
-			// 		console.log(clientSample);
-			// 		const encodedSample = clientSampleEncoder.encode(clientSample);
-			// 		console.log("encodedSample.toBinary()", encodedSample, encodedSample.toBinary().length);
-			// 	}
-			// }
 		} catch (err ) {
 			console.error(err);
 		}

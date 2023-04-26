@@ -46,6 +46,6 @@ you can open `webapp/src/components/Stats/MySandbox.tsx`.
 
 ## Access the observed samples at the server
 
-To evaluate stats, see: `server/src/monitor.ts`
+To evaluate stats, see: `server/src/evaluators/`
 
 To export reports to database see: `server/src/exports.ts`
