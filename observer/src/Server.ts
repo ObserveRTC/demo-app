@@ -1,33 +1,26 @@
 import * as http from 'http';
 import { WebSocketServer, WebSocket, EventEmitter } from 'ws';
-import { createLogger } from "./logger";
+import { createLogger } from "./common/logger";
 import url from 'url';
+import { Processor } from './common/Middleware';
 
 const logger = createLogger('Server');
 
 export type ServerConfig = {
-    serverIp: string,
-    hostname: string,
     port: number,
-    rtcMinPort: number,
-    rtcMaxPort: number,
-    announcedIp: string,
 }
 
 export type ServerState = 'idle' | 'started' | 'run' | 'stopped' | 'aborted';
 
+export type ServerHttpRequest = {
+    request: http.IncomingMessage,
+    response: http.ServerResponse<http.IncomingMessage> & {
+        req: http.IncomingMessage;
+    },
+}
+
 export interface ServerEvents {
-    httpRequest: {
-        request: http.IncomingMessage,
-        response: http.ServerResponse<http.IncomingMessage> & {
-            req: http.IncomingMessage;
-        },
-    },
-    stateChange: {
-        prevState: ServerState,
-        newState: ServerState,
-    },
-    wsConnection: {
+    'websocket-connection': {
         webSocket: WebSocket,
         query: any,
     }
@@ -38,7 +31,8 @@ export class Server {
     private _state: ServerState = 'idle';
     private _httpServer?: http.Server;
     private _wsServer?: WebSocketServer;
-
+    private _processor?: Processor<ServerHttpRequest> | undefined;
+    
     public constructor(
         public readonly config: ServerConfig,
     ) {
@@ -62,7 +56,6 @@ export class Server {
         });
 
         this._setState('run');
-
     }
 
     public async stop(): Promise<void> {
@@ -98,14 +91,25 @@ export class Server {
         const prevState = this._state;
         this._state = value;
         logger.info(`State changed from ${prevState} to ${this._state}`);
-        this._emit('stateChange', {
-            prevState,
-            newState: this._state,
-        });
     }
 
     public get state() {
         return this._state;
+    }
+
+    public set processor(value: Processor<ServerHttpRequest> | undefined) {
+        if (value === undefined) {
+            this._processor = undefined;
+            return;
+        }
+        if (this._processor) {
+            throw new Error(`Cannot assign processor twice`);
+        }
+        this._processor = value;
+    }
+
+    public get processor(): Processor<ServerHttpRequest> | undefined {
+        return this._processor;
     }
 
     public on<K extends keyof ServerEvents>(event: K, listener: (data: ServerEvents[K]) => void): this {
@@ -135,8 +139,12 @@ export class Server {
             }
         );
         result.on('request', (request, response) => {
-            this._emit('httpRequest', {
-                request, 
+            if (!this._processor) {
+                logger.warn(`Cannot process http request, becasue no processor is assigned to the Server`, request);
+                return;
+            }
+            this._processor({
+                request,
                 response
             })
         });
@@ -155,7 +163,7 @@ export class Server {
             // console.warn("\n\n", url.parse(req.url, true).query, "\n\n");
             const query = url.parse(req.url ?? '', true).query;
             logger.info(`Websocket connection is requested from ${req.socket.remoteAddress}, query:`, query);
-            this._emit('wsConnection', {
+            this._emit('websocket-connection', {
                 webSocket: ws,
                 query,
             });

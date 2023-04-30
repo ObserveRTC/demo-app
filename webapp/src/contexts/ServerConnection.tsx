@@ -15,6 +15,8 @@ export type ServerConnectionConfig = {
 	maxBufferSize: number,
 	retryingPaceTimeInMs: number,
 	resendPaceInMs: number,
+	clientId: string,
+	roomId: string,
 }
 
 export class ServerConnection {

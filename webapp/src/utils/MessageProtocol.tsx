@@ -70,6 +70,7 @@ export class JoinCallResponse {
     public constructor(
         public readonly requestId: string,
         public readonly callId: string,
+        public readonly observerAccessToken: string,
     ) {
 
     }

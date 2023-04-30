@@ -1,7 +1,6 @@
-import { CallEventReport, EvaluatorProcess, SfuEventReport } from "@observertc/observer-js";
-import { observer } from "mediasoup";
+import { EvaluatorProcess } from "@observertc/observer-js";
 import Prometheus from 'prom-client';
-import { createLogger } from "../logger";
+import { createLogger } from "../common/logger";
 
 const logger = createLogger('TurnEvaluator');
 
@@ -15,10 +14,6 @@ export function createTurnEvaluator(registry: Prometheus.Registry): EvaluatorPro
 
 	return async (context) => {
 		const { 
-			observedCalls,
-			endedCalls,
-			// detachedClients
-			reports,
 			storages
 		} = context;
 		
@@ -30,13 +25,16 @@ export function createTurnEvaluator(registry: Prometheus.Registry): EvaluatorPro
 			if (!peerConnection.clientId)
 				continue;
 			
+			// logger.info("peerConnection", peerConnection);
+			
 			const turnCandidateIds = peerConnection.iceRemoteCandidates.filter(c => c.candidateType === 'relay').map(c => c.id);
 			const isClientUseTurn = peerConnection.iceCandidatePairs.filter(c => turnCandidateIds.includes(c.remoteCandidateId));
 			if (0 < isClientUseTurn.length) 
 				clientsUsingTurn.add(peerConnection.clientId);
+
+		
 		}
 		const numberOfClients = await clientStorage.size();
 		turnUsage.set((clientsUsingTurn.size / numberOfClients) * 100)
-
 	}
 }

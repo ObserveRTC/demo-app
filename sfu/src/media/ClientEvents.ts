@@ -2,7 +2,7 @@ import { EventEmitter, WebSocket, RawData } from "ws";
 import { 
     Message
 } from "./MessageProtocol";
-import { createLogger } from "./logger";
+import { createLogger } from "../common/logger";
 
 const logger = createLogger('ClientEvents')
 

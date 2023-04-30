@@ -1,11 +1,17 @@
 import { ClientEvents } from "./ClientEvents"
 import { WebSocket } from "ws";
 import * as mediasoup from 'mediasoup';
-import { ObservedClientSource, Observer } from "@observertc/observer-js";
-import { GetRouterCapabilitiesResponse, CreateProducerResponse, CreateTransportResponse, PauseProducerResponse, ConsumerCreatedNotification, JoinCallResponse, ConsumerClosedNotification } from "./MessageProtocol";
-import { createLogger } from "./logger";
+import { createLogger } from "../common/logger";
 import { RtpCapabilities } from "mediasoup/node/lib/types";
-import { ClientSampleDecoder } from "@observertc/samples-decoder";
+import { 
+	GetRouterCapabilitiesResponse, 
+	CreateProducerResponse, 
+	CreateTransportResponse, 
+	PauseProducerResponse, 
+	ConsumerCreatedNotification, 
+	JoinCallResponse, 
+	ConsumerClosedNotification 
+} from "./MessageProtocol";
 
 const logger = createLogger('Room');
 
@@ -13,7 +19,6 @@ export type ClientContext = {
 	webSocket: WebSocket,
 	clientId: string,
 	userId: string,
-	clientSource: ObservedClientSource,
 }
 
 export type EventsMap = {
@@ -29,7 +34,6 @@ type Client = {
 	rcvTransport?: mediasoup.types.WebRtcTransport,
 	producers: Map<string, mediasoup.types.Producer>,
 	consumers: Map<string, mediasoup.types.Consumer>,
-	clientSampleDecoder: ClientSampleDecoder,
 }
 
 export type RoomConfig = {
@@ -44,7 +48,6 @@ export abstract class MediasoupRoom {
 	public constructor(
 		public readonly config: RoomConfig,
 		private readonly _router: mediasoup.types.Router,
-		private readonly _observer: Observer,
 	) {
 		this._router.observer.once('close', () => this.close());
 	}
@@ -58,7 +61,7 @@ export abstract class MediasoupRoom {
 	}
 
 	public add(clientContext: ClientContext) {
-		const { clientId, userId, clientSource } = clientContext;
+		const { clientId, userId } = clientContext;
 	
 		const producers = new Map<string, mediasoup.types.Producer>();
 		const consumers = new Map<string, mediasoup.types.Consumer>();
@@ -69,7 +72,6 @@ export abstract class MediasoupRoom {
 			clientEvents: events,
 			producers,
 			consumers,
-			clientSampleDecoder: new ClientSampleDecoder(),
 		};
 		
 		logger.info(`Add client ${clientId}, ${userId}`);
@@ -119,9 +121,20 @@ export abstract class MediasoupRoom {
 				if (clientId === producingClientId) continue;
 				await this._consumeClient(producingClientId, client.clientId);
 			}
+			const jwt = require('jsonwebtoken');
+			const observerAccessToken = jwt.sign({ 
+					roomId: this.roomId,
+					clientId: client.clientId,
+					callId: this.callId,
+					expires: Date.now() + 4 * 60 * 1000,
+				}, 
+				'no-client-secret'
+			);
+
 			events.send(new JoinCallResponse(
 				requestId,
 				this.callId,
+				observerAccessToken
 			));
 		})
 		.on('transport-connected-notification', async ({ role, dtlsParameters }) => {
@@ -200,31 +213,6 @@ export abstract class MediasoupRoom {
 			events.send(new PauseProducerResponse(
 				requestId
 			));
-		})
-		.on('get-client-stats-request', async ({ requestId, remoteClientId }) => {
-			if (!this._clients.has(remoteClientId)) {
-				return;
-			}
-
-			// const client = await this._observer.getClient(remoteClientId);
-			
-			const observedClient = await this._observer.getClient(remoteClientId);
-			if (!observedClient) {
-				return;
-			}
-			
-			const peerConnections = await this._observer.getAllPeerConnections(observedClient.peerConnectionIds)
-			const outboundTrackIds = Array.from(peerConnections.values()).flatMap(pc => pc.outboundTrackIds);
-			const outboundTracks = await this._observer.getAllOutboundTracks(outboundTrackIds);
-			for (const outboundTrack of outboundTracks.values()) {
-				if (outboundTrack.kind === 'audio') {
-					
-				}
-			}
-		})
-		.on('observed-sample-notification', ({ clientSample: base64Str }) => {
-			const clientSample = client.clientSampleDecoder.decodeFromBase64(base64Str);
-			clientSource.accept(clientSample);
 		})
 		.once('close', () => {
 			logger.info(`Closing client ${clientId}`);

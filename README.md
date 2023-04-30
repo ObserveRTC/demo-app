@@ -9,13 +9,19 @@ git clone https://github.com/ObserveRTC/demo-app.git
 
 ## Install and Build
 
-1. Install the server 
+1. Install the observer
 
 ```bash
-cd server && yarn
+cd observer && yarn && tsc
 ```
 
-2. Install the webapp
+2. Install the sfu
+
+```bash
+cd sfu && yarn && tsc
+```
+
+3. Install the webapp
 
 ```bash
 cd webapp && yarn
@@ -23,15 +29,23 @@ cd webapp && yarn
 
 ## Run
 
-1. Start server
+1. Start observer
 
 ```bash
-cd server
+cd observer
 
 node dist/main.js
 ```
 
-2. Start the webapp
+2. Start sfu
+
+```bash
+cd sfu
+
+node dist/main.js
+```
+
+3. Start the webapp
 
 ```bash
 cd webapp
@@ -39,13 +53,3 @@ cd webapp
 yarn start
 ```
 
-## Add your monitoring in the webapp
-
-To see how for example you can use the client-monitor and develop something on top of it, 
-you can open `webapp/src/components/Stats/MySandbox.tsx`.
-
-## Access the observed samples at the server
-
-To evaluate stats, see: `server/src/evaluators/`
-
-To export reports to database see: `server/src/exports.ts`
