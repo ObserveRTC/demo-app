@@ -1,6 +1,5 @@
-import { Observer } from "@observertc/observer-js";
 import * as mediasoup from "mediasoup";
-import { MediasoupRoom, RoomConfig } from "./MediasoupRoom";
+import { MediasoupRoom, RoomConfig } from "./Room";
 import { mediaCodecs } from './constants';
 
 export type WorkerAppData = {
@@ -14,7 +13,6 @@ export class MediasoupRooms {
 	
 	public constructor(
 		private _worker: mediasoup.types.Worker,
-		private _observer: Observer
 	) {
 
 	}
@@ -45,7 +43,6 @@ export class MediasoupRooms {
 			}(
 				roomConfig, 
 				router,
-				this._observer,
 			);
 			rooms.set(roomId, room);
 			return room;

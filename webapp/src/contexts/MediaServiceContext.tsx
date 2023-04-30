@@ -8,6 +8,7 @@ import { MediasoupService } from './MediasoupService';
 import { ObservedSamplesNotification } from '../utils/MessageProtocol';
 import { useAppSelector } from '../store/hooks';
 import { ClientSampleEncoder } from "@observertc/samples-encoder";
+import { ObserverServiceClient } from '../utils/ObserverServiceClient';
 
 const logger = createLogger('MediaServiceContext');
 
@@ -27,77 +28,64 @@ let called = 0;
 export const MediaServiceProvider: React.FC<MediaServiceContextProps> = ({ children, roomId, serviceType }) => {
 	const localClient = useAppSelector(state => state.localClient);
 	const [mediaService, setMediaService] = useState<MediaService | null>(null);
+	const queryString = Object.entries({
+		clientId: localClient.clientId,
+		userId: localClient.userId,
+		roomId,
+	}).reduce(
+		(str, [key, val]) => `${str}&${key}=${val}`,
+		''
+	);
+	
 	const [serverConnection] = useState<ServerConnection>(new ServerConnection({
 			maxBufferSize: -1, // inf
 			maxBufferTimeInMs: -1, // inf
 			maxRetry: -1, // inf
 			retryingPaceTimeInMs: 1000,
 			resendPaceInMs: 200,
-			url: `ws://localhost:8080?${
-			[
-				`roomId=${roomId}`,
-				`clientId=${localClient.clientId}`,
-				`userId=${localClient.userId}`
-			]
-			.join('&')}
-			`,
+			roomId,
+			clientId: localClient.clientId,
+			url: `ws://localhost:8080?${queryString}`,
 
   }));
-
+  
   useEffect(() => {
 	if (1 < ++called) return;
 
 	const monitor = createClientMonitor({
 		collectingPeriodInMs: 2000,
-		samplingPeriodInMs: 5000,
-		sendingPeriodInMs: 10000,
+		samplingPeriodInMs: 7000,
+		createCallEvents: true,
 	});
 
-	if (serviceType === 'mediasoup') {
-		const device = new Device();
-		
-		monitor.collectors.addMediasoupDevice(device);
+	const observerService = new ObserverServiceClient({
+		wsAddress: 'wss://',
+		reconnect: true,
+	});
+	monitor.on('sample-created', ({ clientSample }) => {
+		observerService.send(clientSample);
+	});
 
-
-		const mediaService = new MediasoupService(
-			serverConnection,
-			device,
-			monitor,
-		);
-		mediaService.connect().then(() => {
-			setMediaService(mediaService);
-		});
-		
+	switch (serviceType) {
+		case 'mediasoup': {
+			const mediaService = new MediasoupService(
+				serverConnection,
+				monitor,
+				observerService,
+			);
+			mediaService.connect().then(() => {
+				setMediaService(mediaService);
+			});
+			break;
+		}
+		default:
+			console.error(`Unrecognized media service type`, serviceType);
 	}
-	
 	for (const peerConnection of Array.from(monitor.storage.peerConnections())) {
 		if (peerConnection.label === 'snd') {
 			
 		}
 	}
-	
-	// const ws = new WebSocket(`ws://localhost:7080/`);
-	const clientSampleEncoder = new ClientSampleEncoder();
-	// const messageSizes: number[] = [];
-	
-	monitor.on('sample-created', ({ clientSample }) => {
-		
-		try {
-			// const messageSize = clientSampleEncoder.encodeToUint8Array(clientSample).length;
-			// messageSizes.push(messageSize);
-			// console.log("message sizes", messageSizes);
-			const encodedSample = clientSampleEncoder.encodeToBase64(clientSample);
-			// ws.send(encodedSample.toBinary());
-			serverConnection.sendMessage(new ObservedSamplesNotification(
-				encodedSample,
-			))
-		} catch (err ) {
-			console.error(err);
-		}
-		
-		
-		
-	})
   }, [])
 
   return (<MediaServiceContext.Provider value={mediaService}>{children}</MediaServiceContext.Provider>);

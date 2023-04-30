@@ -1,7 +1,6 @@
-import { CallEventReport, EvaluatorProcess, SfuEventReport } from "@observertc/observer-js";
-import { observer } from "mediasoup";
+import { EvaluatorProcess } from "@observertc/observer-js";
 import Prometheus from 'prom-client';
-import { createLogger } from "../logger";
+import { createLogger } from "../common/logger";
 
 const logger = createLogger('CommonEvaluator');
 

@@ -17,6 +17,7 @@ import {
 } from '../utils/MessageProtocol';
 import { createLogger } from "../utils/logger";
 import { MediaService, MediaServiceEvents } from "./MediaService";
+import { ObserverServiceClient } from "../utils/ObserverServiceClient";
 
 const logger = createLogger('MediasoupService');
 
@@ -26,12 +27,17 @@ export class MediasoupService implements MediaService {
 	private _emitter = new EventEmitter();
 	private _producers = new Map<string, Producer>();
 	private _consumers = new Map<string, Consumer>();
+	private readonly _device = new Device();
 
 	public constructor(
 		private _serverConnection: ServerConnection,
-		private readonly _device: Device,
 		public readonly monitor: ClientMonitor,
+		private readonly _observerClient: ObserverServiceClient,
 	) {
+
+		// integrate observertc
+		this.monitor.collectors.addMediasoupDevice(this._device);
+
 		this._serverConnection.on('consumer-created-notification', async event => {
 			logger.info(`Consumer Created Event is emitted`, event);
 			if (!this._rcvTransport) {
@@ -126,7 +132,26 @@ export class MediasoupService implements MediaService {
 		this._rcvTransport = rcvTransport;
 		
 		const joined = await this._serverConnection.request<JoinCallResponse>(new JoinCallRequest(uuid()));
+		// const messageSizes: number[] = [];
+		// const observerWs = new WebSocket(`ws://34.100.241.177?accessToken=${joined.observerAccessToken}&schemaVersion=${schemaVersion}`, 'client-sample');
+		const observerClient = new ObserverServiceClient({
+			wsAddress: `ws://localhost:7080`,
+			reconnect: true,
+		});
 		
+		const queryString = Object.entries({
+			clientId: this._serverConnection.config.clientId,
+			callId: joined.callId,
+			roomId: this._serverConnection.config.roomId,
+		}).reduce(
+			(str, [key, val]) => `${str}&${key}=${val}`,
+			''
+		);
+		observerClient.connect(queryString);
+
+		this.monitor.on('sample-created', ({ clientSample }) => {
+			observerClient.send(clientSample);
+		})
 		logger.info(`Created sndTransport, and rcvTransport`);
 	}
 

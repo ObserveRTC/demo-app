@@ -22,24 +22,6 @@ const appConfigSchema = {
         doc: 'the meida unit id used in the observer',
         defaultValue: 'demo-app'
     },
-    serverIp: {
-        argv: 'serverIp',
-        env: 'SERVER_IP',
-        doc: 'The IP of the server',
-        defaultValue: '127.0.0.1'
-    },
-    announcedIp: {
-        argv: 'announcedIp',
-        env: 'ANNOUNCED_IP',
-        doc: 'The announced IP the mediasoup will use for RTC connections',
-        defaultValue: '127.0.0.1'
-    },
-    hostname: {
-        argv: 'hostname',
-        env: 'HOSTNAME',
-        doc: 'The hostname of the server',
-        defaultValue: 'localhost'
-    },
     logLevel: {
         argv: 'logLevel',
         env: 'LOG_LEVEL',
@@ -50,20 +32,8 @@ const appConfigSchema = {
         argv: 'port',
         env: 'PORT',
         doc: 'The port number the server listens',
-        defaultValue: 8080
+        defaultValue: 7080
     },
-    rtcMinPort: {
-        argv: 'rtcMinPort',
-        env: 'RTC_MIN_PORT',
-        doc: 'The minimum port the server accepts RTC connections',
-        defaultValue: 5000
-    },
-    rtcMaxPort: {
-        argv: 'rtcMaxPort',
-        env: 'RTC_MAX_PORT',
-        doc: 'The maximum port the server accepts RTC connections',
-        defaultValue: 5100
-    }
 }
 
 type Schema = typeof appConfigSchema;
@@ -86,17 +56,10 @@ export const help = () => {
 }
 
 export const loadConfig = async () => {
-    const hostname = loadConfigEntry('hostname');
-    const serverIp = await lookup(hostname)
     const result = {
         serviceId: loadConfigEntry('serviceId'),
         mediaUnitId: loadConfigEntry('mediaUnitId'),
-        serverIp: loadConfigEntry('serverIp', serverIp),
-        announcedIp: loadConfigEntry('announcedIp'),
-        hostname,
         port: loadConfigEntry('port'),
-        rtcMinPort: loadConfigEntry('rtcMinPort'),
-        rtcMaxPort: loadConfigEntry('rtcMaxPort'),
         logLevel: loadConfigEntry('logLevel'),
     };
     return result;

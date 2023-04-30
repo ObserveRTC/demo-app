@@ -1,4 +1,3 @@
-import { Samples } from "@observertc/observer-js";
 import * as mediasoup from "mediasoup";
 
 export class ConsumerCreatedNotification {
@@ -12,15 +11,6 @@ export class ConsumerCreatedNotification {
             userId: string,
             clientId: string,
         }
-    ) {
-
-    }
-}
-
-export class ObservedSamplesNotification {
-    public readonly type = 'observed-sample-notification';
-    public constructor(
-        public readonly clientSample: string
     ) {
 
     }
@@ -69,6 +59,7 @@ export class JoinCallResponse {
     public constructor(
         public readonly requestId: string,
         public readonly callId: string,
+        public readonly observerAccessToken: string,
     ) {
 
     }
@@ -234,7 +225,6 @@ export type Response =
 ;
 
 export type Notification = 
-    | ObservedSamplesNotification
     | ConsumerClosedNotification
     | ConsumerCreatedNotification
     | TransportConnectedNotification

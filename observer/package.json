@@ -25,17 +25,15 @@
   },
   "homepage": "https://github.com/balazskreith/webrtc-sfu-transcriber#readme",
   "dependencies": {
-    "@bufbuild/protobuf": "^1.2.0",
-    "@observertc/observer-js": "^0.9.5-beta",
+    "@observertc/observer-js": "^0.9.9-beta",
     "@observertc/samples-decoder": "^2.2.1-9620b7f.0",
-    "@observertc/samples-encoder": "^2.2.1-9620b7f.0",
-    "@observertc/sfu-monitor-js": "^2.0.0",
     "@types/ws": "^8.2.2",
+    "debug": "^4.3.4",
     "events": "^3.3.0",
-    "mediasoup": "^3.10.0",
+    "jsonwebtoken": "^9.0.0",
     "prom-client": "^14.2.0",
     "uuid": "^8.3.2",
-    "ws": "^8.8.0",
+    "ws": "^8.13.0",
     "yargs-parser": "^21.1.1"
   },
   "devDependencies": {

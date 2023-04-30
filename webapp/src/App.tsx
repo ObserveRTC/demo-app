@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MediaServiceProvider } from './contexts/MediaServiceContext';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import LocalClient from './components/Clients/LocalClient';
-import RemoteClients from './components/Clients/RemoteClients';
 import AppLayout from './AppLayout';
 import { Provider } from 'react-redux';
 import store from './store/store';
