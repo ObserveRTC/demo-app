@@ -1,0 +1,12 @@
+{
+	"browserwarning": "Your browser may work, but it is not officially supported. Please use the latest version of Chrome or Edge for the best experience.",
+	"browsererror": "Your browser is not supported. Please use the latest version of Chrome or Edge for the best experience.",
+	"deviceerror": "Unable to get access to your webcam and/or microphone. Please make sure you have a webcam and microphone and that they are not being used by another application.",
+	"signalerror": "Unable to connect to the server for real time communication. Please check your internet connection and try again.",
+	"mediawarningtcp": "Your network connection is blocking UDP media traffic, and you are forced to use TCP. This may reduce audio and video quality.",
+	"mediawarningrelay": "Your network connection is restricting media traffic and might direct it through a relay server. This may reduce audio and video quality.",
+	"mediawarningbw": "Your network connection is showing signs of low or restricted bandwidth. This may reduce audio and video quality.",
+	"mediawarningloss": "Your network connection is showing signs of high packet loss. This may reduce audio and video quality.",
+	"mediawarninglatency": "Your network connection is showing signs of high latency. This may reduce audio and video quality.",
+	"mediaerror": "Unable to connect to the media servers. Please check your internet connection and try again."
+}
