@@ -6,6 +6,7 @@ import { ControlConsumerNotification } from '../protocols/MessageProtocol';
 const logger = createLogger('MediasoupService');
 
 export type MediasoupServiceConfig = {
+	numberOfWorkers: number;
 	workerSettings: mediasoup.types.WorkerSettings;
 	mediaCodecs: mediasoup.types.RtpCodecCapability[];
 }
@@ -22,7 +23,7 @@ type ConsumerAppData = {
 
 export class MediasoupService {
 	private _run = false;
-	private _worker?: mediasoup.types.Worker;
+	public readonly workers = new Map<number, mediasoup.types.Worker>();
 	public readonly routers = new Map<string, mediasoup.types.Router>();
 	public readonly transports = new Map<string, mediasoup.types.Transport>();
 	public readonly mediaProducers = new Map<string, mediasoup.types.Producer<ProducerAppData>>();
@@ -40,30 +41,37 @@ export class MediasoupService {
 		if (this._run) return;
 		this._run = true;
 
-		const worker = await mediasoup.createWorker(this.config.workerSettings);
+		for (let i = 0; i < this.config.numberOfWorkers; i++) {
+			const worker = await mediasoup.createWorker(this.config.workerSettings);
 
-		worker.once('died', () => {
-			this._worker = undefined;
-		});
-		this._worker = worker;
+			worker.once('died', () => {
+				this.workers.delete(worker.pid);
+				logger.error(`Worker ${worker.pid} died`);
+			});
+			this.workers.set(worker.pid, worker);	
+
+			logger.info(`Worker ${worker.pid} created`);
+		}
 	}
 
 	public async stop() {
 		if (!this._run) return;
 		this._run = false;
 
-		this._worker?.close();
+		for (const worker of this.workers.values()) {
+			worker.close();
+		}
 	}
 
 	public async getOrCreateRouter(routerId?: string): Promise<mediasoup.types.Router> {		
-		if (!this._worker) throw new Error('Worker is not started');
+		if (!this.workers) throw new Error('Worker is not started');
 		
 		let router = this.routers.get(routerId || '');
 		
 		if (router) return router;
 
-		
-		router = await this._worker.createRouter({
+		const worker = [...this.workers.values()][Math.floor(Math.random() * this.workers.size)];
+		router = await worker.createRouter({
 			mediaCodecs: this.config.mediaCodecs,
 		});
 

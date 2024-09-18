@@ -1,6 +1,12 @@
 import { createSignal } from 'solid-js';
 
-export type Page = 'lobby' | 'room' | 'exit' | 'observer';
+export type Page = 
+    | 'lobby' 
+    | 'stunner'
+    | 'videoCall' 
+    | 'clientMonitor'
+    | 'exit' 
+    | 'observer';
 
 export const [ page, setPage ] = createSignal<Page>('lobby');
 

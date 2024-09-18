@@ -36,6 +36,7 @@ const ClientMonitorStateProperties: Component = () => {
 	});
 	onCleanup(() => {
 		clientStore.call?.monitor?.off('stats-collected', onChange);
+		
 	});
 	return (
 		<TableContainer component={Paper}>

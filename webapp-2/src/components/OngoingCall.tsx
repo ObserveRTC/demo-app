@@ -44,9 +44,9 @@ const OngoingCall: Component<OngoingCallProps> = (props) => {
 	);
 
 	const timer = setInterval(async () => {
-		if (!window.observerClient) return;
+		if (!window.call) return;
 
-		const newFetchedStats = await window.observerClient.getCallStats(props.callId);
+		const newFetchedStats = await window.call.getCallStats(props.callId);
 
 		// console.warn('newFetchedStats', newFetchedStats);
 
@@ -57,7 +57,7 @@ const OngoingCall: Component<OngoingCallProps> = (props) => {
 		clearInterval(timer);
 	});
 	return (
-		<Box full={true} title={props.callId}>
+		<Box full={true} title={props.callId.slice(0, -8) + '********'}>
 			<TableContainer component={Paper}>
 				<Table sx={{ minWidth: 650 }} aria-label="simple table">
 					<TableBody>

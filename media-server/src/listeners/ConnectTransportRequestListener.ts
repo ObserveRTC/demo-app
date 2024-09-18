@@ -29,6 +29,8 @@ export function createConnectTransportRequestListener(listenerContext: ConnectTr
 					return console.warn(`Client ${messageContext.clientId} not found`);
 				}
 
+				logger.debug(`Transport ${request.transportId} attempt to connect`);
+
 				let response: ConnectTransportResponsePayload | undefined;
 				let error: string | undefined;
 				

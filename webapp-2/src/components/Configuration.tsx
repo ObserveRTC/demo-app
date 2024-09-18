@@ -1,13 +1,13 @@
 /* eslint-disable no-unused-vars */
 import { Component, createSignal, JSX, Show } from 'solid-js';
-import { CallConfig } from '../utils/Call';
+import { ConnectionConfig } from '../utils/Connection';
 import { ErrorPaperItem } from './PaperItem';
 import { Accordion } from './Accordion/Accordion';
 
 type ConfigurationProps = {
 	children?: JSX.Element;
-	getCallConfig: () => CallConfig;
-	setCallConfig: (config: CallConfig) => void;
+	getCallConfig: () => ConnectionConfig;
+	setCallConfig: (config: ConnectionConfig) => void;
 };
 
 const Configuration: Component<ConfigurationProps> = (props) => {

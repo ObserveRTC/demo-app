@@ -16,6 +16,7 @@ const getDefaultConfig: () => Config = () => {
             serverIp: '127.0.0.1',
         },
         mediasoup: {
+            numberOfWorkers: 1,
             workerSettings: {
                 logLevel: 'warn',
                 logTags: ['info', 'ice', 'dtls', 'rtp', 'srtp', 'rtcp'],

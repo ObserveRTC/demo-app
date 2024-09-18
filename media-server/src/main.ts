@@ -139,8 +139,11 @@ async function main(): Promise<void> {
         stopped = true;
 
         logger.info("Stopping server");
-        await server.stop();
-        await mediasoupService.stop();
+        await Promise.allSettled([
+            server.stop(),
+            mediasoupService.stop(),
+        ]);
+        process.exit(0);
     });
 
     logger.info("Loaded config %s", getConfigString());
@@ -155,6 +158,7 @@ async function main(): Promise<void> {
     await mediasoupService.start();
     await server.start();
 }
+
 
 main()
     

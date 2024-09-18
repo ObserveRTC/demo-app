@@ -8,6 +8,9 @@ import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
 import { 
 	ClientMessage, 
 	NotificationMap, 
+	ObservedGetOngoingCallResponse, 
+	ObserverGetCallStatsResponse, 
+	ObserverRequest, 
 	RequestMap 
 } from './MessageProtocol';
 import { 
@@ -22,7 +25,7 @@ import {
 
 const logger = console;
 
-export type CallConfig = {
+export type ConnectionConfig = {
 	clientId: string;
 	serverUri: string;
 	requestTimeoutInMs: number;
@@ -31,7 +34,8 @@ export type CallConfig = {
 	forceRelay?: boolean;
 }
 
-export type CallEventMap = {
+export type ConnectionEventMap = {
+	'join': [],
 	'error': [string],
 	'close': [],
 	'newconsumer': [Consumer]
@@ -43,21 +47,21 @@ type ConsumerAppData = {
 	producerPaused: boolean,
 }
 
-export declare interface Call {
+export declare interface Connection {
 	// eslint-disable-next-line no-unused-vars
-	on<U extends keyof CallEventMap>(event: U, listener: (...args: CallEventMap[U]) => void): this;
+	on<U extends keyof ConnectionEventMap>(event: U, listener: (...args: ConnectionEventMap[U]) => void): this;
 	// eslint-disable-next-line no-unused-vars
-	off<U extends keyof CallEventMap>(event: U, listener: (...args: CallEventMap[U]) => void): this;
+	off<U extends keyof ConnectionEventMap>(event: U, listener: (...args: ConnectionEventMap[U]) => void): this;
 	// eslint-disable-next-line no-unused-vars
-	once<U extends keyof CallEventMap>(event: U, listener: (...args: CallEventMap[U]) => void): this;
+	once<U extends keyof ConnectionEventMap>(event: U, listener: (...args: ConnectionEventMap[U]) => void): this;
 	// eslint-disable-next-line no-unused-vars
-	emit<U extends keyof CallEventMap>(event: U, ...args: CallEventMap[U]): boolean;
+	emit<U extends keyof ConnectionEventMap>(event: U, ...args: ConnectionEventMap[U]): boolean;
 
 }
 // eslint-disable-next-line no-unused-vars
 type PendingRequest = { resolve: (payload: any) => void, reject: (error: string) => void, timer: ReturnType<typeof setTimeout> }
 // eslint-disable-next-line no-redeclare
-export class Call extends EventEmitter {
+export class Connection extends EventEmitter {
 	// eslint-disable-next-line no-unused-vars
 	private readonly _pendingRequests = new Map<string, PendingRequest>();
 	public readonly mediaProducers = new Map<string, Producer>();
@@ -71,7 +75,7 @@ export class Call extends EventEmitter {
 	private readonly _encoder: ClientSampleEncoder;
 
 	public constructor(
-		public readonly config: CallConfig
+		public readonly config: ConnectionConfig
 	) {
 		super();
 		this.monitor = createClientMonitor(config.monitor);
@@ -137,6 +141,8 @@ export class Call extends EventEmitter {
 		await this._device.load({ routerRtpCapabilities });
 		this.sndTransport = await this._createTransportProcess('createSendTransport', routerRtpCapabilities, iceServers);
 		this.rcvTransport = await this._createTransportProcess('createRecvTransport', routerRtpCapabilities, iceServers);
+
+		this.emit('join');
 	}
 
 	public get callId() {
@@ -150,7 +156,32 @@ export class Call extends EventEmitter {
 	public close() {
 		if (this._closed) return;
 		this._closed = true;
+
+		this.monitor.close();
+		this.sndTransport?.close();
+		this.rcvTransport?.close();
+		this._websocket?.close();
 		this.emit('close');
+	}
+
+	public async getCallStats(callId: string) {
+		return this._request('observer-request', {
+			operation: {
+				type: 'getCallStats',
+				payload: {
+					callId,
+				},
+			} as ObserverRequest['operation'],
+		}) as Promise<ObserverGetCallStatsResponse>;
+	}
+
+	public async getOngoingCalls() {
+		return this._request('observer-request', {
+			operation: {
+				type: 'getOngoingCalls',
+				payload: {},
+			} as ObserverRequest['operation'],
+		}) as Promise<ObservedGetOngoingCallResponse>;
 	}
 
 	private async _receiveMessage(data: string) {
@@ -218,6 +249,7 @@ export class Call extends EventEmitter {
 		this._websocket!.send(JSON.stringify({ type, ...payload }));
 	}
 
+	// eslint-disable-next-line no-unused-vars
 	private async _createTransportProcess(method: 'createSendTransport' | 'createRecvTransport', capabilities: RtpCapabilities, iceServers: RTCIceServer[]): Promise<Transport> {
 		if (!this._device) throw new Error('Device is not initialized');
 
@@ -229,7 +261,7 @@ export class Call extends EventEmitter {
 	
 		const transport = this._device[method]({ 
 			...transportOptions, 
-			iceServers, 
+			iceServers: undefined, 
 			iceTransportPolicy: this.config.forceRelay ? 'relay' : 'all' 
 		});
 	

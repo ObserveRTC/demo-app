@@ -1669,6 +1669,11 @@ json-buffer@3.0.1:
   resolved "https://registry.yarnpkg.com/json-buffer/-/json-buffer-3.0.1.tgz#9338802a30d3b6605fbe0613e094008ca8c05a13"
   integrity sha512-4bV5BfR2mqfQTJm+V5tPPdf+ZpuhiIvTuAB5g8kcrXOZpTT/QwwVRWBywX1ozr6lEuPdbHxwaJlm9G6mI2sfSQ==
 
+json-formatter-js@^2.5.18:
+  version "2.5.18"
+  resolved "https://registry.yarnpkg.com/json-formatter-js/-/json-formatter-js-2.5.18.tgz#49406a56dda8430adae041998481de9e47b9591e"
+  integrity sha512-1OF3PafvJRAZAhb3EZUjLBdG+HXSpdHytV3nOD19OLzbhQgc8q8J8F6ro9hSdbcG0rXeWq33dQ37HxQLp3y74A==
+
 json-schema-traverse@^0.4.1:
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/json-schema-traverse/-/json-schema-traverse-0.4.1.tgz#69f6a87d9513ab8bb8fe63bdb0979c448e684660"

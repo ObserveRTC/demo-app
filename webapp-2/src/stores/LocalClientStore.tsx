@@ -1,6 +1,5 @@
 import { createStore } from 'solid-js/store';
-import { v4 as uuid } from 'uuid';
-import { Call } from '../utils/Call';
+import { Connection } from '../utils/Connection';
 
 type SavedMediaDevice = {
 	deviceId: string;
@@ -16,9 +15,8 @@ type UpdateDeviceOptions = {
 
 export type LocalClientStore = {
 	updateInProgress: boolean;
-	call?: Call;
+	call?: Connection;
 	userId?: string,
-	clientId: string,
 	audioDevices: SavedMediaDevice[];
 	videoDevices: SavedMediaDevice[];
 	selectedAudioDeviceId?: string;
@@ -28,7 +26,6 @@ export type LocalClientStore = {
 
 export const [clientStore, setClientStore] = createStore<LocalClientStore>({
 	updateInProgress: false,
-	clientId: uuid(),
 	audioDevices: [],
 	videoDevices: [],
 });

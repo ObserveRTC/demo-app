@@ -1,10 +1,8 @@
-import { Show, createSignal, onMount, type Component, For } from 'solid-js';
+import { Show, createSignal, onMount, type Component } from 'solid-js';
 import Box from '../Box';
 import { ErrorPaperItem } from '../PaperItem';
 import { clientStore } from '../../stores/LocalClientStore';
-import ClientMonitorStatsProperties from './ClientMonitorStatsProperties';
-import { Accordion } from '../Accordion/Accordion';
-import PeerConnectionStatsProperties from './PeerConnectionStatsProperties';
+import ClientMonitorShowEntry from './ClientMonitorShowEntry';
 
 
 const ClientMonitor: Component = () => {
@@ -17,21 +15,16 @@ const ClientMonitor: Component = () => {
 		clientMonitor.totalAvailableIncomingBitrate;
 	});
 	return (
-		<Box title='ClientMonitor (monitor)' full={true}>
-			<Show when={error()}>
-				<ErrorPaperItem>{error()}</ErrorPaperItem>
-			</Show>
-			<Accordion title='monitor[stats properties]'>
-				<ClientMonitorStatsProperties />
-			</Accordion>
-			<For each={clientStore.call?.monitor.peerConnections}>
-				{ (peerConnection) => (
-					<Accordion title={`monitor.peerConnections[${peerConnection.label}][properties]`}>
-						<PeerConnectionStatsProperties peerConnectionId={peerConnection.peerConnectionId} />
-					</Accordion>
-				)}
-			</For>
-		</Box>
+		<>
+			<Box full={true}>
+				<Show when={error()}>
+					<ErrorPaperItem>{error()}</ErrorPaperItem>
+				</Show>
+			</Box>
+
+			<ClientMonitorShowEntry />
+		</>
+		
 	);
 };
 

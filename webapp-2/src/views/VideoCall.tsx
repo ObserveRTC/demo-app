@@ -2,15 +2,13 @@ import { Show, createSignal, onMount, type Component, For } from 'solid-js';
 import Box from '../components/Box';
 import LocalClientVideo from '../components/LocalClientVideo';
 import { produceMedia } from '../actions/actions';
-import { ErrorPaperItem, PaperItem } from '../components/PaperItem';
-import { Button, Grid } from '@suid/material';
-import ClientMonitor from '../components/ClientMonitor/ClientMonitor';
-import ClientMonitorStateProperties from '../components/ClientMonitor/ClientMonitorStateProperties';
+import { ErrorPaperItem } from '../components/PaperItem';
+import { Grid } from '@suid/material';
 import { clientStore } from '../stores/LocalClientStore';
-import { writeClipboard } from '@solid-primitives/clipboard';
 import { remoteClientStore } from '../stores/RemoteClientsStore';
 import RemoteClientVideo from '../components/RemoteClientVideo';
 import RemoteClientAudio from '../components/RemoteClientAudio';
+import ClientMonitorBaseCharts from '../components/ClientMonitor/ClientMonitorBaseCharts';
 
 // import { setTestState } from '../signals/signals';
 // import Button from '../components/Button';
@@ -19,7 +17,6 @@ import RemoteClientAudio from '../components/RemoteClientAudio';
 
 const Monitor: Component = () => {
 	const [ error, setError ] = createSignal<string | undefined>();
-	const [ copyBtnText, setCopyBtnText ] = createSignal<string | undefined>('Copy');
 	
 	onMount(() => {
 		produceMedia().catch((e) => setError(`${e}`));
@@ -27,37 +24,32 @@ const Monitor: Component = () => {
 
 	return (
 		<Grid container spacing={2}>
-			<Grid item xs={12}>
-				<PaperItem>Call: {clientStore.call?.callId} 
-					<Button onClick={() => {
-						writeClipboard(clientStore.call?.callId ?? '');
-						setCopyBtnText('Copied');
-						setTimeout(() => {
-							setCopyBtnText('Copy');
-						}, 2000);
-					}}>{copyBtnText()}</Button></PaperItem>
-			</Grid>
 			<Show when={error()}>
 				<Grid item xs={12}>
 					<ErrorPaperItem>{error()}</ErrorPaperItem>
 				</Grid>
 			</Show>
 			<Grid item xs={8}>
-				<ClientMonitor />
+				<Box full={true}>
+					<ClientMonitorBaseCharts />
+				</Box>
+				
 			</Grid>
 			<Grid item xs={4}>
-				<Box title={`Local Client (${clientStore.userId ?? clientStore.clientId})`} full={true}>
+				<Box title={`Local Client (${clientStore.userId ?? clientStore.call?.config.clientId})`} full={true}>
 					<LocalClientVideo showControls={true} />
-					<ClientMonitorStateProperties />
+					{/* <ClientMonitorStateProperties /> */}
 				</Box>
 				<For each={remoteClientStore.videoConsumerIds}>{(consumerId) => (
-					<Box title='Remote Client' full={true}>
+					<Box title={`Remote Client (${consumerId})`} full={true}>
 						<RemoteClientVideo consumerId={consumerId} />
 					</Box>
 				)}
 				</For>
 				<For each={remoteClientStore.audioConsumerIds}>{(consumerId) => (
-					<RemoteClientAudio consumerId={consumerId} />
+					<>
+						<RemoteClientAudio consumerId={consumerId} />
+					</>
 				)}
 				</For>
 			</Grid>
